@@ -5,7 +5,6 @@
 #ifndef LEARN_RECORD_APPLICATION_H
 #define LEARN_RECORD_APPLICATION_H
 
-#include "window.h"
 #include "render.h"
 #include "shader.h"
 
@@ -25,13 +24,20 @@ namespace yic{
 
         void run();
 
+
+
+
     private:
         Window yic_window{width, height, "yicvot"};
         Render render{};
 
+
+
         std::string text{"Text"};
         char textbox[50]{"text box"};
         ImVec4 color{};
+
+
 
     };
 }

@@ -4,8 +4,10 @@
 
 #include "window.h"
 
+#include <utility>
+
 namespace yic{
-    Window::Window(int w, int h, std::string name) : width(w), height(h), name(name) {
+    Window::Window(int w, int h, std::string name) : width(w), height(h), name(std::move(name)) {
         initWindow();
     }
 
@@ -20,6 +22,11 @@ namespace yic{
         glfwMakeContextCurrent(window);
         glfwSwapInterval(0);
         glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+
+        //glfwSetCursorPosCallback(window, reinterpret_cast<GLFWcursorposfun>(mouseCallback));
+        //glfwSetScrollCallback(window, scrollCallback);
+
+        //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
         if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)){
             std::cout << "failed to initialize glad" << std::endl;
@@ -56,9 +63,48 @@ namespace yic{
         if(glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS){
             glfwSetWindowShouldClose(window, true);
         }
+//        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+//            camera.ProcessKeyboard(FORWARD, deltaTime);
+//        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+//            camera.ProcessKeyboard(BACKWARD, deltaTime);
+//        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+//            camera.ProcessKeyboard(LEFT, deltaTime);
+//        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+//            camera.ProcessKeyboard(RIGHT, deltaTime);
     }
 
     void Window::framebufferSizeCallback(GLFWwindow *window, int width, int height) {
         glViewport(0, 0, width, height);
     }
+
+    void Window::mouseCallback(GLFWwindow *window, double xposIn, double yposIn, int width, int height) {
+        float xpos = static_cast<float>(xposIn);
+        float ypos = static_cast<float>(yposIn);
+
+        float lastX = width / 2.0f;
+        float lastY = height / 2.0f;
+        bool firstMouse = true;
+        if (firstMouse)
+        {
+            lastX = xpos;
+            lastY = ypos;
+            firstMouse = false;
+        }
+
+        float xoffset = xpos - lastX;
+        float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+
+        lastX = xpos;
+        lastY = ypos;
+
+        camera.ProcessMouseMovement(xoffset, yoffset);
+    }
+
+    void Window::scrollCallback(GLFWwindow *window, double xoffset, double yoffset) {
+        camera.ProcessMouseScroll(static_cast<float>(yoffset));
+    }
+
+
 }
+
+

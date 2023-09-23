@@ -4,14 +4,15 @@
 
 #include "application.h"
 
-namespace yic{
+namespace yic {
 
     void Application::run() {
+        //glEnable(GL_DEPTH_TEST);
 
-        while (!yic_window.windowShouldClose()){
+        while (!yic_window.windowShouldClose()) {
             yic_window.processInput(yic_window.getWindow());
 
-            render.setBuffer();
+            render.render();
 
             yic_window.imguiDraw();
 
@@ -19,6 +20,5 @@ namespace yic{
             glfwPollEvents();
         }
     }
-
 
 }

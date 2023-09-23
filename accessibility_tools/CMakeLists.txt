@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.3)
 project(learn_cmake)
 
 include_directories(${PROJECT_SOURCE_DIR}/cmake/src)
@@ -9,7 +9,7 @@ include_directories(${PROJECT_SOURCE_DIR}/cmake/src)
 
 aux_source_directory(${PROJECT_SOURCE_DIR}/cmake/src src)
 set(src cmake/main.cpp
-        ${src})
+        ${src} )
 
 #file(GLOB src ${CMAKE_CURRENT_SOURCE_DIR}/cmake*.cpp)
 
