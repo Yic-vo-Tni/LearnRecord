@@ -1,0 +1,5 @@
+# ninja log v5
+2	267	7168540161891111	CMakeFiles/learn_cmake.dir/cmake/main.cpp.obj	4c4d0b34e1588db6
+6	61	7168540159830890	CMakeFiles/learn_cmake.dir/cmake/src/yic_math.cpp.obj	202a357dc0432a0
+1	76	7168901224207468	build.ninja	6f4716e10ccfe0cb
+267	358	7168540162714809	learn_cmake.exe	e91a4e649d18f274

@@ -1,0 +1,159 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2
+					],
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.4"
+					},
+					"projectIndex" : 0,
+					"source" : "."
+				},
+				{
+					"build" : "c++",
+					"jsonFile" : "directory-c++-Debug-2d80c77c815a8f3032de.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.4"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "c++",
+					"targetIndexes" : 
+					[
+						1,
+						2,
+						3,
+						4,
+						5
+					]
+				},
+				{
+					"build" : "library/imgui",
+					"jsonFile" : "directory-library.imgui-Debug-fb477af84bcde5e0f941.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.4"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 2,
+					"source" : "library/imgui",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1,
+						2
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "learn_record"
+				},
+				{
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "learnCplusplus",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1,
+						2,
+						3,
+						4,
+						5
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						2
+					],
+					"name" : "LearnImgui",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 2,
+					"id" : "LearnImgui::@9f754596240c46f1dd42",
+					"jsonFile" : "target-LearnImgui-Debug-1b1df97eb76b6aed7631.json",
+					"name" : "LearnImgui",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "learnCplusplus::@ae2aa36d72358acfb282",
+					"jsonFile" : "target-learnCplusplus-Debug-1a5714b13bd16bd2cd52.json",
+					"name" : "learnCplusplus",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "optional::@ae2aa36d72358acfb282",
+					"jsonFile" : "target-optional-Debug-6ede644b5d202880848b.json",
+					"name" : "optional",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "tuple::@ae2aa36d72358acfb282",
+					"jsonFile" : "target-tuple-Debug-eb2b2e07cb62c9ec5eb4.json",
+					"name" : "tuple",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "variant::@ae2aa36d72358acfb282",
+					"jsonFile" : "target-variant-Debug-6d5eb6a606b803fb83c0.json",
+					"name" : "variant",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "vector::@ae2aa36d72358acfb282",
+					"jsonFile" : "target-vector-Debug-252ede843fcc6d9b7391.json",
+					"name" : "vector",
+					"projectIndex" : 1
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "F:/Program/LearningRecord/cmake-build-debug",
+		"source" : "F:/Program/LearningRecord"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 5
+	}
+}
