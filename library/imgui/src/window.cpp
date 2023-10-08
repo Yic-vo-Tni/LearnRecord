@@ -6,7 +6,7 @@
 
 #include <utility>
 
-namespace yic{
+namespace yic {
     Window::Window(int w, int h, std::string name) : width(w), height(h), name(std::move(name)) {
         initWindow();
     }
@@ -22,20 +22,21 @@ namespace yic{
         glfwMakeContextCurrent(window);
         glfwSwapInterval(0);
         glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+        glfwSetScrollCallback(window, scrollCallback);
 
-        //glfwSetCursorPosCallback(window, reinterpret_cast<GLFWcursorposfun>(mouseCallback));
-        //glfwSetScrollCallback(window, scrollCallback);
+//        if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+//            glfwSetCursorPosCallback(window,mouseCallback);
+//            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+//        }
 
-        //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-        if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)){
+        if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
             std::cout << "failed to initialize glad" << std::endl;
         }
 
         IMGUI_CHECKVERSION();
         ImGui::CreateContext(nullptr);
-        ImGuiIO& io = ImGui::GetIO();
-        (void)io;
+        ImGuiIO &io = ImGui::GetIO();
+        (void) io;
 
         ImGui::StyleColorsDark();
         ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -60,44 +61,84 @@ namespace yic{
     }
 
     void Window::processInput(GLFWwindow *window) {
-        if(glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS){
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, true);
         }
+
+        if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+            mouse = false;
+            glfwSetCursorPosCallback(window,mouseCallback);
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
+
+
+        if(glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS){
+            mouse = true;
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
+
 //        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-//            camera.ProcessKeyboard(FORWARD, deltaTime);
+//            camera.ProcessKeyboard(Forward, deltaTime);
 //        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-//            camera.ProcessKeyboard(BACKWARD, deltaTime);
+//            camera.ProcessKeyboard(Backward, deltaTime);
 //        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-//            camera.ProcessKeyboard(LEFT, deltaTime);
+//            camera.ProcessKeyboard(Left, deltaTime);
 //        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-//            camera.ProcessKeyboard(RIGHT, deltaTime);
+//            camera.ProcessKeyboard(Right_, deltaTime);
+
+        float cameraSpeed = static_cast<float>(2.5 * deltaTime);
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            position.cameraPos += cameraSpeed * position.cameraFront;
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            position.cameraPos -= cameraSpeed * position.cameraFront;
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+            position.cameraPos -= glm::normalize(glm::cross(position.cameraFront, position.cameraUp)) * cameraSpeed;
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+            position.cameraPos += glm::normalize(glm::cross(position.cameraFront, position.cameraUp)) * cameraSpeed;
     }
 
     void Window::framebufferSizeCallback(GLFWwindow *window, int width, int height) {
         glViewport(0, 0, width, height);
     }
 
-    void Window::mouseCallback(GLFWwindow *window, double xposIn, double yposIn, int width, int height) {
+    void Window::mouseCallback(GLFWwindow *window, double xposIn, double yposIn) {
         float xpos = static_cast<float>(xposIn);
         float ypos = static_cast<float>(yposIn);
 
-        float lastX = width / 2.0f;
-        float lastY = height / 2.0f;
-        bool firstMouse = true;
+        if(mouse){
+            return;
+        }
+
         if (firstMouse)
         {
-            lastX = xpos;
-            lastY = ypos;
+            position.lastX = xpos;
+            position.lastY = ypos;
             firstMouse = false;
         }
 
-        float xoffset = xpos - lastX;
-        float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+        float xoffset = xpos - position.lastX;
+        float yoffset = position.lastY - ypos; // reversed since y-coordinates go from bottom to top
+        position.lastX = xpos;
+        position.lastY = ypos;
 
-        lastX = xpos;
-        lastY = ypos;
+        float sensitivity = 0.1f; // change this value to your liking
+        xoffset *= sensitivity;
+        yoffset *= sensitivity;
 
-        camera.ProcessMouseMovement(xoffset, yoffset);
+        position.yaw += xoffset;
+        position.pitch += yoffset;
+
+        // make sure that when pitch is out of bounds, screen doesn't get flipped
+        if (position.pitch > 89.0f)
+            position.pitch = 89.0f;
+        if (position.pitch < -89.0f)
+            position.pitch = -89.0f;
+
+        glm::vec3 front;
+        front.x = cos(glm::radians(position.yaw)) * cos(glm::radians(position.pitch));
+        front.y = sin(glm::radians(position.pitch));
+        front.z = sin(glm::radians(position.yaw)) * cos(glm::radians(position.pitch));
+        position.cameraFront = glm::normalize(front);
     }
 
     void Window::scrollCallback(GLFWwindow *window, double xoffset, double yoffset) {

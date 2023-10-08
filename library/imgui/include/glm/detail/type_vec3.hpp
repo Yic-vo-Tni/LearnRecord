@@ -4,6 +4,7 @@
 #pragma once
 
 #include "qualifier.hpp"
+
 #if GLM_CONFIG_SWIZZLE == GLM_SWIZZLE_OPERATOR
 #	include "_swizzle.hpp"
 #elif GLM_CONFIG_SWIZZLE == GLM_SWIZZLE_FUNCTION
@@ -15,7 +16,7 @@ namespace glm
 {
 	template<typename T, qualifier Q>
 	struct vec<3, T, Q>
-	{
+             {
 		// -- Implementation detail --
 
 		typedef T value_type;

@@ -9,9 +9,19 @@
 #include "shader.h"
 //#include "camera.h"
 #include "window.h"
+#include "camera.h"
+
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb-master/stb_image.h"
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#include "unistd.h"
+
+
 
 namespace yic{
 
@@ -19,8 +29,7 @@ namespace yic{
     class Render{
     public:
 
-        //Render();
-        Render();
+        Render(int w, int h, Window window);
         ~Render();
 
         Render(const Render&) = delete;
@@ -30,23 +39,24 @@ namespace yic{
 
         void setBuffer();
         //static void loadTexture();
-        void render();
+        void render(float w, float h);
         void loadTexture();
 
 
 
+
     private:
+        Window window;
+
         unsigned int VBO, VAO, EBO{};
-        float width{};
-        float height{};
-        float deltaTime = 0.0f;	// time between current frame and last frame
-        float lastFrame = 0.0f;
+        float width{}, height{};
         unsigned int texture1, texture2;
+        glm::mat4 view{};
 
-
-
+        char buf[256];
 
         Shader shader{R"(F:\Program\LearningRecord\library\imgui\src\shader\shader.vert)", R"(F:\Program\LearningRecord\library\imgui\src\shader\shader.frag)"};
+        //Shader shader{"../src/shader/shader.vert", "../src/shader/shader.frag"};
     };
 }
 

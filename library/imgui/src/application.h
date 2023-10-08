@@ -24,12 +24,9 @@ namespace yic{
 
         void run();
 
-
-
-
     private:
         Window yic_window{width, height, "yicvot"};
-        Render render{};
+        Render render{width, height, yic_window};
 
 
 

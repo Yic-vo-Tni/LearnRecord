@@ -7,12 +7,16 @@
 namespace yic {
 
     void Application::run() {
-        //glEnable(GL_DEPTH_TEST);
+        glEnable(GL_DEPTH_TEST);
 
         while (!yic_window.windowShouldClose()) {
+            auto currentFrame = static_cast<float>(glfwGetTime());
+            yic_window.deltaTime = currentFrame - yic_window.lastFrame;
+            yic_window.lastFrame = currentFrame;
+
             yic_window.processInput(yic_window.getWindow());
 
-            render.render();
+            render.render(width, height);
 
             yic_window.imguiDraw();
 

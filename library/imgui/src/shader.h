@@ -13,6 +13,7 @@
 #include "fstream"
 #include "sstream"
 #include "iostream"
+#include "filesystem"
 
 namespace yic{
     class Shader{

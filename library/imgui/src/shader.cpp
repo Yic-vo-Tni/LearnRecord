@@ -8,14 +8,29 @@ namespace yic{
     Shader::Shader(const char *vertexPath, const char *fragmentPath) {
         std::string vertexCode;
         std::string fragmentCode;
+        //std::filesystem::path vertexPath = std::filesystem::absolute(vertexPath_t);
+        //std::filesystem::path fragmentPath = std::filesystem::absolute(fragmentPath_t);
+
+        std::cout << vertexPath << std::endl;
         std::ifstream vShaderFile;
         std::ifstream fShaderFile;
+//        try {vShaderFile.open(vertexPath);}catch(std::ifstream::failure& e) {
+//            std::cout << "YIC_ERROR" << std::endl;
+//        }
         // ensure ifstream objects can throw exceptions:
+
+//        if(vShaderFile.is_open()){
+//            std::cout << "success" << std::endl;
+//        } else{
+//            std::cout << "failed" << std::endl;
+//        }
         vShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
         fShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
+
         try
         {
             // open files
+
             vShaderFile.open(vertexPath);
             fShaderFile.open(fragmentPath);
             std::stringstream vShaderStream, fShaderStream;
