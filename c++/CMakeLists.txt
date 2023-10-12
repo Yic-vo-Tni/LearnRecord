@@ -23,7 +23,7 @@ foreach (mainfile IN LISTS mains)
 endforeach ()
 endif ()
 
-#add_executable(learnCplusplus main.cpp)
+add_executable(learnCplusplus main.cpp)
 #add_subdirectory(stl)
 #add_subdirectory(Modern_c++)
 # add_subdirectory(Algorithm)
