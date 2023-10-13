@@ -2243,7 +2243,7 @@ static void stbte__compute_panel_locations(stbte_tilemap *tm)
    }
 }
 
-// unique identifiers for imgui
+// unique identifiers for OpenGL_Imgui
 enum
 {
    STBTE__map=1,
