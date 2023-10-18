@@ -1,12 +1,18 @@
 //
 // Created by lenovo on 10/13/2023.
 //
-//#include "vulkan/vulkan.h"
-#include "iostream"
+#include <iostream>
+#include "src/application.h"
 
 int main(){
+    yic::Application app;
 
-    std::cout << 3 << std::endl;
+    try {
+        app.run();
+    } catch (const std::exception& e){
+        std::cerr << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
 
-    return 0;
+    return EXIT_SUCCESS;
 }

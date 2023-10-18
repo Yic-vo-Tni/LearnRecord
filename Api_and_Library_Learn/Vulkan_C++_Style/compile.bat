@@ -1,0 +1,2 @@
+D:\Software\VulkanSDK\Bin\glslc.exe F:\Program\LearningRecord\Api_and_Library_Learn\Vulkan_C++_Style\shader\vertexShader.vert -o F:\Program\LearningRecord\Api_and_Library_Learn\Vulkan_C++_Style\shader\fragmentShader.vert.spv
+D:\Software\VulkanSDK\Bin\glslc.exe F:\Program\LearningRecord\Api_and_Library_Learn\Vulkan_C++_Style\shader\fragmentShader.frag -o F:\Program\LearningRecord\Api_and_Library_Learn\Vulkan_C++_Style\shader\fragmentShader.frag.spv

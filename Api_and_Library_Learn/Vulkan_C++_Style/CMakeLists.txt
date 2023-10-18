@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.3)
 project(VulkanC++)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 include_directories(external/GLFW
         external/glm)
@@ -9,12 +9,14 @@ include_directories(external/GLFW
 link_directories(lib)
 
 find_package(Vulkan REQUIRED)
+find_program(GLSLC glslc REQUIRED)
 
 aux_source_directory(src SRCS)
 
-add_executable(VulkanC++ main.cpp ${SRCS})
+execute_process(COMMAND ${GLSLC} ${CMAKE_SOURCE_DIR}/shader/*.vert -o ${CMAKE_SOURCE_DIR}/shader/*vert.spv)
+execute_process(COMMAND ${GLSLC} ${CMAKE_SOURCE_DIR}/shader/*.frag -o ${CMAKE_SOURCE_DIR}/shader/*frag.spv)
 
-#add_custom_target(CustomTarget COMMAND cmd /c F:/Program/VulkanGaEN/compile.bat) add_dependencies(VulkanGaEN CustomTarget))
+add_executable(VulkanC++ main.cpp ${SRCS})
 
 
 target_link_libraries(VulkanC++ glfw3)
