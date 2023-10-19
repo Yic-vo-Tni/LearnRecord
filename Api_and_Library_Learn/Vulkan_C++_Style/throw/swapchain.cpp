@@ -10,7 +10,7 @@ const int MAX_FRAMES_IN_FLIGHT = 2;
 
 namespace yic{
 
-    Renderer::Renderer(Window &window, Device& device, SwapChain& swapChain) : window_{window}, device_{device}, swapChain_{swapChain}{
+    Renderer::Renderer(Window &window, Device& device) : window_{window}, device_{device}{
         init();
     }
 
@@ -19,6 +19,8 @@ namespace yic{
     }
 
     void Renderer::init() {
+        createSwapChain();
+        createImageViews();
         createRenderPass();
         createGraphicsPipeline();
         createFrameBuffers();
@@ -29,9 +31,10 @@ namespace yic{
 
     void Renderer::clean() {
         for(auto& swapChainFrameBuffer : swapChainFrameBuffers) { device_.device_().destroy(swapChainFrameBuffer); }
-
+        for(auto& swapChainImageView : swapChainImageViews) { device_.device_().destroy(swapChainImageView); }
 
         device_.device_().destroyCommandPool(commandPool);
+        device_.device_().destroySwapchainKHR(swapChain);
         device_.device_().destroy(graphicsPipeline);
         device_.device_().destroy(pipelineLayout);
         device_.device_().destroy(renderPass);
@@ -41,9 +44,88 @@ namespace yic{
     }
 
 
+
+
+
+    void Renderer::createSwapChain() {
+        SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device_.physicalDevice_());
+
+        vk::SurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
+        vk::PresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
+        vk::Extent2D extent2D = chooseSwapExtent(swapChainSupport.capabilities);
+
+        uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
+
+        if(swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount){
+            imageCount = swapChainSupport.capabilities.maxImageCount;
+        }
+
+        vk::SwapchainCreateInfoKHR createInfo{};
+        createInfo.setSurface(device_.surface_())
+                .setMinImageCount(imageCount)
+                .setImageFormat(surfaceFormat.format)
+                .setImageColorSpace(surfaceFormat.colorSpace)
+                .setImageExtent(extent2D)
+                .setImageArrayLayers(1)
+                .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment);
+
+        Device::QueueFamilyIndices indices = device_.findQueueFamilies(device_.physicalDevice_());
+        uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
+
+        if(indices.graphicsFamily != indices.presentFamily){
+            createInfo.setImageSharingMode(vk::SharingMode::eConcurrent)
+                    .setQueueFamilyIndexCount(2)
+                    .setPQueueFamilyIndices(queueFamilyIndices);
+        } else{
+            createInfo.setImageSharingMode(vk::SharingMode::eExclusive)
+                    .setQueueFamilyIndexCount(0)
+                    .setPQueueFamilyIndices(0);
+        }
+
+        createInfo.setPreTransform(swapChainSupport.capabilities.currentTransform)
+                .setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque)
+                .setPresentMode(presentMode)
+                .setClipped(VK_TRUE);
+
+        createInfo.setOldSwapchain(VK_NULL_HANDLE);
+
+        swapChain = device_.device_().createSwapchainKHR(createInfo);
+        swapChainImages = device_.device_().getSwapchainImagesKHR(swapChain);
+        swapChainImageFormat = surfaceFormat.format;
+        swapChainExtent = extent2D;
+    }
+
+    void Renderer::createImageViews() {
+        swapChainImageViews.resize(swapChainImages.size());
+
+        vk::ComponentMapping components;
+        components.setA(vk::ComponentSwizzle::eIdentity)
+                .setB(vk::ComponentSwizzle::eIdentity)
+                .setG(vk::ComponentSwizzle::eIdentity)
+                .setR(vk::ComponentSwizzle::eIdentity);
+        vk::ImageSubresourceRange subresourceRange;
+        subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor)  // 设置图像的使用目的（颜色）
+                .setBaseMipLevel(0)  // 设置mip级别的基本级别（从0级开始）
+                .setLevelCount(1)     // 设置mip级别的层数（本例中为1，表示只使用一个mip级别）
+                .setBaseArrayLayer(0) // 设置数组层的基本层（从0层开始）
+                .setLayerCount(1);     // 设置数组层的层数（本例中为1，表示只使用一个数组层）
+
+        for(int i = 0; i < swapChainImages.size(); i++){
+            vk::ImageViewCreateInfo createInfo{};
+
+            createInfo.setImage(swapChainImages[i])
+                    .setViewType(vk::ImageViewType::e2D)
+                    .setFormat(swapChainImageFormat)
+                    .setComponents(components)
+                    .setSubresourceRange(subresourceRange);
+
+            swapChainImageViews[i] = device_.device_().createImageView(createInfo);
+        }
+    }
+
     void Renderer::createRenderPass() {
         vk::AttachmentDescription colorAttachment{};
-        colorAttachment.setFormat(swapChain_.swapChainImageFormat_())
+        colorAttachment.setFormat(swapChainImageFormat)
                 .setSamples(vk::SampleCountFlagBits::e1)
                 .setLoadOp(vk::AttachmentLoadOp::eClear)
                 .setStoreOp(vk::AttachmentStoreOp::eStore)
@@ -199,17 +281,17 @@ namespace yic{
     }
 
     void Renderer::createFrameBuffers() {
-        swapChainFrameBuffers.resize(swapChain_.swapChainImageViews_().size());
+        swapChainFrameBuffers.resize(swapChainImageViews.size());
 
-        for(int i = 0; i < swapChain_.swapChainImageViews_().size(); i++){
-            vk::ImageView attachments[] = {swapChain_.swapChainImageViews_()[i]};
+        for(int i = 0; i < swapChainImageViews.size(); i++){
+            vk::ImageView attachments[] = {swapChainImageViews[i]};
 
             vk::FramebufferCreateInfo framebufferCreateInfo{};
             framebufferCreateInfo.setRenderPass(renderPass)
                     .setAttachmentCount(1)
                     .setPAttachments(attachments)
-                    .setWidth(swapChain_.swapChainExtent_().width)
-                    .setHeight(swapChain_.swapChainExtent_().height)
+                    .setWidth(swapChainExtent.width)
+                    .setHeight(swapChainExtent.height)
                     .setLayers(1);
 
             swapChainFrameBuffers[i] = device_.device_().createFramebuffer(framebufferCreateInfo);
@@ -259,7 +341,7 @@ namespace yic{
         device_.device_().waitForFences(1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
         uint32_t imageIndex;
-        vk::ResultValue<uint32_t> rvImageIndex = device_.device_().acquireNextImageKHR(swapChain_.swapChain_(), UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE);
+        vk::ResultValue<uint32_t> rvImageIndex = device_.device_().acquireNextImageKHR(swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE);
         switch (rvImageIndex.result) {
             case vk::Result::eErrorOutOfDateKHR:
 
@@ -281,7 +363,7 @@ namespace yic{
         vk::Semaphore waitSemaphores[] = {imageAvailableSemaphores[currentFrame]};
         vk::Semaphore signalSemaphores[] = {renderFinishedSemaphores[currentFrame]};
         vk::PipelineStageFlags waitStages[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
-        vk::SwapchainKHR swapChains[] = {swapChain_.swapChain_()};
+        vk::SwapchainKHR swapChains[] = {swapChain};
 
         vk::SubmitInfo submitInfo{};
         submitInfo.setWaitSemaphoreCount(1)
@@ -334,7 +416,7 @@ namespace yic{
             vk::RenderPassBeginInfo renderPassBeginInfo{};
             renderPassBeginInfo.setRenderPass(renderPass)
                     .setFramebuffer(swapChainFrameBuffers[imageIndex])
-                    .setRenderArea(vk::Rect2D(vk::Offset2D(0, 0), swapChain_.swapChainExtent_()));
+                    .setRenderArea(vk::Rect2D(vk::Offset2D(0, 0), swapChainExtent));
 
             vk::ClearValue clearValue = vk::ClearColorValue(1.f, 0.71f, 0.75f, 1.f);
             renderPassBeginInfo.setClearValueCount(1)
@@ -347,8 +429,8 @@ namespace yic{
                 vk::Viewport viewport{};
                 viewport.setX(0.f)
                         .setY(0.f)
-                        .setWidth(static_cast<float>(swapChain_.swapChainExtent_().width))
-                        .setHeight(static_cast<float>(swapChain_.swapChainExtent_().height))
+                        .setWidth(static_cast<float>(swapChainExtent.width))
+                        .setHeight(static_cast<float>(swapChainExtent.height))
                         .setMinDepth(0.f)
                         .setMaxDepth(1.f);
 
@@ -356,7 +438,7 @@ namespace yic{
 
                 vk::Rect2D scissor{};
                 scissor.setOffset(vk::Offset2D(0, 0))
-                        .setExtent(swapChain_.swapChainExtent_());
+                        .setExtent(swapChainExtent);
 
                 commandBuffer.setScissor(0, 1, &scissor);
 
@@ -394,6 +476,54 @@ namespace yic{
 
         return buffer;
     }
+
+    Renderer::SwapChainSupportDetails Renderer::querySwapChainSupport(const vk::PhysicalDevice &device) {
+        SwapChainSupportDetails details{};
+
+        details.capabilities = device.getSurfaceCapabilitiesKHR(device_.surface_());
+        details.formats = device.getSurfaceFormatsKHR(device_.surface_());
+        details.presentModes = device.getSurfacePresentModesKHR(device_.surface_());
+
+        return details;
+    }
+
+
+    vk::SurfaceFormatKHR Renderer::chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR> &availableFormats) {
+        for(const auto& available : availableFormats){
+            if(available.format == vk::Format::eR8G8B8A8Srgb && available.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear){
+                return available;
+            }
+        }
+
+        return availableFormats[0];
+    }
+
+    vk::PresentModeKHR Renderer::chooseSwapPresentMode(const std::vector<vk::PresentModeKHR> &availablePresentModes) {
+        for(const auto& available : availablePresentModes){
+            if(available == vk::PresentModeKHR::eMailbox){
+                return available;
+            }
+        }
+        return vk::PresentModeKHR::eFifo;
+    }
+
+    vk::Extent2D Renderer::chooseSwapExtent(const vk::SurfaceCapabilitiesKHR &capabilities) {
+        if(capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()){
+            return capabilities.currentExtent;
+        } else{
+            int width, height;
+            glfwGetFramebufferSize(window_.getWindow(), &width, &height);
+
+            vk::Extent2D actualExtent = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
+            actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
+            actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.width, capabilities.maxImageExtent.height);
+
+            return actualExtent;
+        }
+    }
+
+
+
 
 
 }

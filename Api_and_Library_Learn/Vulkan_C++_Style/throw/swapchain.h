@@ -14,7 +14,15 @@ namespace yic {
 
     class Renderer {
     public:
-        Renderer(Window& window, Device& device, SwapChain& swapChain);
+
+
+        struct SwapChainSupportDetails{
+            vk::SurfaceCapabilitiesKHR capabilities;
+            std::vector<vk::SurfaceFormatKHR> formats;
+            std::vector<vk::PresentModeKHR> presentModes;
+        };
+
+        Renderer(Window& window, Device& device);
         ~Renderer();
 
 
@@ -24,6 +32,13 @@ namespace yic {
         void init();
         void clean();
 
+
+
+        vk::SwapchainKHR swapChain;
+        vk::Format swapChainImageFormat;
+        vk::Extent2D swapChainExtent;
+        std::vector<vk::Image> swapChainImages;
+        std::vector<vk::ImageView> swapChainImageViews;
         std::vector<vk::Framebuffer> swapChainFrameBuffers;
 
         vk::RenderPass renderPass;
@@ -42,8 +57,9 @@ namespace yic {
 
         Window& window_;
         Device& device_;
-        SwapChain& swapChain_;
 
+        void createSwapChain();
+        void createImageViews();
         void createRenderPass();
         void createGraphicsPipeline();
         void createFrameBuffers();
@@ -51,6 +67,10 @@ namespace yic {
         void createCommandBuffers();
         void createSyncObjects();
 
+        vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats);
+        vk::PresentModeKHR chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes);
+        vk::Extent2D chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities);
+        SwapChainSupportDetails querySwapChainSupport(const vk::PhysicalDevice& device);
 
         vk::ShaderModule createShaderModule(const std::vector<char>& code);
         static std::vector<char> readFile(const std::string& fileName);

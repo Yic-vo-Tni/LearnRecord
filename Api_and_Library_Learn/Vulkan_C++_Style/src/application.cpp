@@ -7,11 +7,14 @@ namespace yic {
 
 
     void Application::run() {
-        //pipeline.
+
         while (!window.windowShouldClose()) {
             glfwPollEvents();
+
+            renderer.drawFrame();
         }
 
+        device.device_().waitIdle();
     }
 
 

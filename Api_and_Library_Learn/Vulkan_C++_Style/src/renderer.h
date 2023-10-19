@@ -5,16 +5,13 @@
 #ifndef LEARN_RECORD_CREATE_TIRANGLE_H
 #define LEARN_RECORD_CREATE_TIRANGLE_H
 
-#include <limits>
-#include <fstream>
-
-#include "swapChain.h"
+#include "pipeline.h"
 
 namespace yic {
 
     class Renderer {
     public:
-        Renderer(Window& window, Device& device, SwapChain& swapChain);
+        Renderer(Device& device, SwapChain& swapChain, Pipeline& pipeline);
         ~Renderer();
 
 
@@ -26,9 +23,7 @@ namespace yic {
 
         std::vector<vk::Framebuffer> swapChainFrameBuffers;
 
-        vk::RenderPass renderPass;
-        vk::PipelineLayout pipelineLayout;
-        vk::Pipeline graphicsPipeline;
+
 
         vk::CommandPool commandPool;
         std::vector<vk::CommandBuffer> commandBuffers;
@@ -40,20 +35,18 @@ namespace yic {
 
         bool frameBufferResized = false;
 
-        Window& window_;
         Device& device_;
         SwapChain& swapChain_;
+        Pipeline& pipeline_;
 
-        void createRenderPass();
-        void createGraphicsPipeline();
+
         void createFrameBuffers();
         void createCommandPool();
         void createCommandBuffers();
         void createSyncObjects();
 
 
-        vk::ShaderModule createShaderModule(const std::vector<char>& code);
-        static std::vector<char> readFile(const std::string& fileName);
+
 
         void recordCommandBuffer(vk::CommandBuffer& commandBuffer, uint32_t imageIndex);
     };
