@@ -12,7 +12,6 @@ namespace yic{
     }
 
     Pipeline::~Pipeline(){
-        device_.device_().destroy(desSetLayout);
         device_.device_().destroy(graphicsPipeline);
         device_.device_().destroy(pipelineLayout);
         device_.device_().destroy(renderPass);
@@ -86,11 +85,11 @@ namespace yic{
                 .setPDynamicStates(dynamicsStates.data());
 
         auto attribute = LoadVertex::Vertex::vertexAttribute();
-        auto vertexBinding = LoadVertex::Vertex::vertexBinding();
+        auto binding = LoadVertex::Vertex::vertexBinding();
 
         vk::PipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.setVertexBindingDescriptionCount(1)
-                .setVertexBindingDescriptions(vertexBinding)
+                .setVertexBindingDescriptions(binding)
                 .setVertexAttributeDescriptionCount(1)
                 .setVertexAttributeDescriptions(attribute);
 
@@ -143,9 +142,8 @@ namespace yic{
                 .setBlendConstants(blendConstants);
 
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo{};
-        desSetLayout = createSetLayout();
-        pipelineLayoutInfo.setSetLayoutCount(1)
-                .setPSetLayouts(&desSetLayout)
+        pipelineLayoutInfo.setSetLayoutCount(0)
+                .setPSetLayouts(nullptr)
                 .setPushConstantRangeCount(0)
                 .setPPushConstantRanges(nullptr);
 
@@ -205,14 +203,5 @@ namespace yic{
 
         vk::ShaderModule shaderModule = device_.device_().createShaderModule(createInfo);
         return shaderModule;
-    }
-
-    vk::DescriptorSetLayout Pipeline::createSetLayout() {
-        vk::DescriptorSetLayoutCreateInfo createInfo{};
-        auto binding = LoadVertex::uniformColor::layoutBinding();
-        createInfo.setBindingCount(1)
-                .setBindings(binding);
-
-        return device_.device_().createDescriptorSetLayout(createInfo);
     }
 }

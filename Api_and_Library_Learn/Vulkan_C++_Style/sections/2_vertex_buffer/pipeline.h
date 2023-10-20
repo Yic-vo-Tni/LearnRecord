@@ -18,8 +18,6 @@ namespace yic{
 
         auto& renderPass_() { return renderPass; }
         auto& graphicsPipeline_() { return graphicsPipeline; }
-        auto& desSetLayout_() { return desSetLayout; }
-        auto& pipelineLayout_() { return pipelineLayout; }
 
     private:
         Device& device_;
@@ -28,14 +26,13 @@ namespace yic{
         vk::RenderPass renderPass;
         vk::PipelineLayout pipelineLayout;
         vk::Pipeline graphicsPipeline;
-        vk::DescriptorSetLayout desSetLayout;
 
         void createRenderPass();
         void createGraphicsPipeline();
 
         vk::ShaderModule createShaderModule(const std::vector<char>& code);
         static std::vector<char> readFile(const std::string& fileName);
-        vk::DescriptorSetLayout createSetLayout();
+
     };
 }
 

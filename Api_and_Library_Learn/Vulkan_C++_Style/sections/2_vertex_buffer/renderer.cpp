@@ -16,20 +16,10 @@ namespace yic{
         createCommandBuffers();
         createVertexBuffer();
         bufferData();
-        createUniformBuffer();
-        createUniformBufferData();
-        createDescriptorPool();
-        allocateSets();
-        updateSets();
         createSyncObjects();
     }
 
     Renderer::~Renderer() {
-        device_.device_().destroyDescriptorPool(descriptorPool);
-
-        hostUniformBuffer.clear();
-        deviceUniformBuffer.clear();
-
         hostVertexBuffer.reset();
         deviceVertexBuffer.reset();
 
@@ -206,7 +196,6 @@ namespace yic{
                 commandBuffer.setScissor(0, 1, &scissor);
 
                 vk::DeviceSize offset = 0;
-                commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline_.pipelineLayout_(), 0, desSet[currentFrame], {});
                 commandBuffer.bindVertexBuffers(0, deviceVertexBuffer->buffer_(), offset);
 
                 commandBuffer.draw(3, 1, 0, 0);
@@ -259,104 +248,6 @@ namespace yic{
     inline void Renderer::freeCommandBuffer(vk::CommandBuffer buffer) {
         device_.device_().freeCommandBuffers(commandPool, buffer);
         commandBuffers.clear();
-    }
-
-    void Renderer::createUniformBuffer() {
-        hostUniformBuffer.resize(MAX_FRAMES_IN_FLIGHT);
-        deviceUniformBuffer.resize(MAX_FRAMES_IN_FLIGHT);
-
-        for(auto& buffer : hostUniformBuffer){
-            buffer = std::make_unique<LoadVertex>(sizeof(uniformColor), vk::BufferUsageFlagBits::eTransferSrc,
-                                         vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, device_);
-        }
-
-        for(auto& buffer : deviceUniformBuffer){
-            buffer = std::make_unique<LoadVertex>(sizeof(uniformColor), vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eUniformBuffer,
-                                                  vk::MemoryPropertyFlagBits::eDeviceLocal, device_);
-        }
-    }
-
-
-    void Renderer::createUniformBufferData() {
-        for(int i = 0; i < hostUniformBuffer.size(); i++){
-            auto& buffer = hostUniformBuffer[i];
-            void* ptr = device_.device_().mapMemory(buffer->memory_(), 0, buffer->size_());
-            memcpy(ptr, &uniformColor, sizeof(uniformColor));
-            device_.device_().unmapMemory(buffer->memory_());
-
-            copyBuffer(buffer->buffer_(), deviceUniformBuffer[i]->buffer_(), buffer->size_(), 0, 0);
-        }
-    }
-
-
-    void Renderer::copyBuffer(vk::Buffer &src, vk::Buffer &dst, size_t size, size_t srcOffset, size_t dstOffset) {
-        auto cmdInfo = commandBufferInfo();
-        cmdInfo.setCommandBufferCount(size);
-        auto commandBuffers_ = device_.device_().allocateCommandBuffers(cmdInfo);
-
-        vk::CommandBufferBeginInfo beginInfo{};
-        beginInfo.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
-
-        for(auto& commandBuffer : commandBuffers_){
-            commandBuffer.begin(beginInfo);{
-                vk::BufferCopy bufferCopy{};
-                bufferCopy.setSize(size)
-                        .setSrcOffset(srcOffset)
-                        .setDstOffset(dstOffset);
-                commandBuffer.copyBuffer(src, dst, bufferCopy);
-            }commandBuffer.end();
-
-            vk::SubmitInfo submitInfo{};
-            submitInfo.setCommandBuffers(commandBuffer);
-            device_.graphicsQueue_().submit(submitInfo);
-
-            device_.device_().waitIdle();
-
-            freeCommandBuffer(commandBuffer);
-        }
-    }
-
-    void Renderer::createDescriptorPool() {
-        vk::DescriptorPoolCreateInfo desPoolInfo{};
-        vk::DescriptorPoolSize desPoolSize{};
-        desPoolSize.setType(vk::DescriptorType::eUniformBuffer)
-                   .setDescriptorCount(MAX_FRAMES_IN_FLIGHT) ;
-        desPoolInfo.setMaxSets(MAX_FRAMES_IN_FLIGHT)
-                   .setPoolSizes(desPoolSize);
-
-        descriptorPool = device_.device_().createDescriptorPool(desPoolInfo);
-    }
-
-
-    void Renderer::allocateSets() {
-        std::vector<vk::DescriptorSetLayout> setLayouts{MAX_FRAMES_IN_FLIGHT, pipeline_.desSetLayout_()};
-        vk::DescriptorSetAllocateInfo desSetAllocInfo{};
-        desSetAllocInfo.setDescriptorPool(descriptorPool)
-                       .setDescriptorSetCount(MAX_FRAMES_IN_FLIGHT)
-                       .setSetLayouts(setLayouts);
-
-        desSet = device_.device_().allocateDescriptorSets(desSetAllocInfo);
-    }
-
-    void Renderer::updateSets() {
-        for(int i = 0; i < desSet.size(); i++){
-            auto& set = desSet[i];
-            vk::DescriptorBufferInfo desBufferInfo{};
-            desBufferInfo.setBuffer(deviceUniformBuffer[i]->buffer_())
-                        .setOffset(0)
-                        .setRange(deviceUniformBuffer[i]->size_());
-
-
-            vk::WriteDescriptorSet writeSet{};
-            writeSet.setDescriptorCount(1)
-                    .setDescriptorType(vk::DescriptorType::eUniformBuffer)
-                    .setBufferInfo(desBufferInfo)
-                    .setDstBinding(0)
-                    .setDstSet(set)
-                    .setDstArrayElement(0);
-
-            device_.device_().updateDescriptorSets(writeSet, {});
-        }
     }
 
 }

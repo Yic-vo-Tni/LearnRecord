@@ -14,8 +14,6 @@ namespace yic {
             LoadVertex::Vertex{-0.8f,  0.8f}
     };
 
-    inline const LoadVertex::uniformColor uniformColor = {0.f, 1.f, 0.f};
-
     class Renderer {
     public:
         Renderer(Device& device, SwapChain& swapChain, Pipeline& pipeline);
@@ -32,6 +30,8 @@ namespace yic {
         void createCommandPool();
         void createCommandBuffers();
         void createSyncObjects();
+        void createVertexBuffer();
+        void bufferData();
 
         vk::CommandPool commandPool;
         std::vector<vk::CommandBuffer> commandBuffers;
@@ -44,27 +44,11 @@ namespace yic {
 
         bool frameBufferResized = false;
 
-        vk::DescriptorPool descriptorPool;
-        std::vector<vk::DescriptorSet> desSet;
-
-        void createVertexBuffer();
-        void bufferData();
-        void createUniformBuffer();
-        void createUniformBufferData();
-        void copyBuffer(vk::Buffer& src, vk::Buffer& dst, size_t size, size_t srcOffset, size_t dstOffset);
-        inline void freeCommandBuffer(vk::CommandBuffer);
-        void createDescriptorPool();
-        void allocateSets();
-        void updateSets();
-
-
         void recordCommandBuffer(vk::CommandBuffer& commandBuffer, uint32_t imageIndex);
         vk::CommandBufferAllocateInfo commandBufferInfo();
-
+        inline void freeCommandBuffer(vk::CommandBuffer);
         std::unique_ptr<LoadVertex> hostVertexBuffer;
         std::unique_ptr<LoadVertex> deviceVertexBuffer;
-        std::vector<std::unique_ptr<LoadVertex>> hostUniformBuffer;
-        std::vector<std::unique_ptr<LoadVertex>> deviceUniformBuffer;
     };
 
 }
