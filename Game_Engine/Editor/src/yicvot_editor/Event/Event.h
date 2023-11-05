@@ -5,17 +5,14 @@
 #ifndef LEARN_RECORD_EVENT_H
 #define LEARN_RECORD_EVENT_H
 
-#include "Core.h"
-
-#include "string"
-#include "functional"
+#include "yicvot_editor/Core.h"
 
 namespace miku {
     enum class EventType {
         None = 0,
         WindowClose, WindowResize, WindowFocus, WindowLostFocus, WindowMoved,
         AppTick, AppUpdate, AppRender,
-        KeyPressed, KeyReleased,
+        KeyPressed, KeyReleased, KeyTyped,
         MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
     };
 

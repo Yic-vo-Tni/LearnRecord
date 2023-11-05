@@ -32,11 +32,6 @@ endforeach ()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SHADER_OUTPUT_DIR})
 
-#execute_process(COMMAND ${GLSLC} ${CMAKE_SOURCE_DIR}/shader/*.vert -o ${CMAKE_SOURCE_DIR}/shader/*vert.spv)
-#execute_process(COMMAND ${GLSLC} ${CMAKE_SOURCE_DIR}/shader/*.frag -o ${CMAKE_SOURCE_DIR}/shader/*frag.spv)
-
-#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/shader)
-
 add_executable(VulkanC++ main.cpp ${SRCS})
 
 

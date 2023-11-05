@@ -5,7 +5,6 @@
 #ifndef LEARN_RECORD_LOG_H
 #define LEARN_RECORD_LOG_H
 
-#include "memory"
 #include "Core.h"
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_color_sinks.h"

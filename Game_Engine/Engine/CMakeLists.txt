@@ -4,7 +4,9 @@ project(Engine)
 set(CMAKE_CXX_STANDARD 17)
 
 include_directories(../Editor/src
-        ../External/spdlog/include)
+        ../External/spdlog/include
+        ../External
+)
 
 set(SOURCES src/yicApp.cpp)
 
@@ -19,3 +21,4 @@ add_custom_command(TARGET yicvot POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
 
 target_include_directories(yicvot PRIVATE include)
 target_link_libraries(yicvot PRIVATE editor)
+target_include_directories(yicvot PRIVATE glfw3)

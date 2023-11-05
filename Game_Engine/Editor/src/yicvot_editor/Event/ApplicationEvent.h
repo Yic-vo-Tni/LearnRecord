@@ -5,7 +5,6 @@
 #ifndef LEARN_RECORD_APPLICATIONEVENT_H
 #define LEARN_RECORD_APPLICATIONEVENT_H
 
-#include "sstream"
 #include "Event.h"
 
 namespace miku{

@@ -24,10 +24,8 @@ namespace yic {
         const int height = 600;
         Window window{width, height, "yic"};
         Device device{window};
-        SwapChain swapChain{window, device};
-        Pipeline pipeline{device, swapChain};
-        Renderer renderer{device, swapChain, pipeline};
 
+        Renderer renderer{device};
     };
 
 }

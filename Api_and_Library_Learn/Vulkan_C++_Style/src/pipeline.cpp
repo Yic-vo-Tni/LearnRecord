@@ -6,7 +6,7 @@
 
 namespace yic{
 
-    Pipeline::Pipeline(yic::Device &device, yic::SwapChain &swapChain) : device_{device}, swapChain_{swapChain} {
+    Pipeline::Pipeline(yic::Device &device) : device_{device} {
         createRenderPass();
         createGraphicsPipeline();
     }
@@ -21,7 +21,7 @@ namespace yic{
 
     void Pipeline::createRenderPass() {
         vk::AttachmentDescription colorAttachment{};
-        colorAttachment.setFormat(swapChain_.swapChainImageFormat_())
+        colorAttachment.setFormat(swapChain_->swapChainImageFormat_())
                 .setSamples(vk::SampleCountFlagBits::e1)
                 .setLoadOp(vk::AttachmentLoadOp::eClear)
                 .setStoreOp(vk::AttachmentStoreOp::eStore)

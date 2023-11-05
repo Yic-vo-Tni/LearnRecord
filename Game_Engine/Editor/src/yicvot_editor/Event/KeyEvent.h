@@ -5,8 +5,8 @@
 #ifndef LEARN_RECORD_KEYEVENT_H
 #define LEARN_RECORD_KEYEVENT_H
 
+#include "yic_pch.h"
 #include "Event.h"
-#include "sstream"
 
 namespace miku {
     class YIC_API KeyEvent : public Event {
@@ -51,6 +51,21 @@ namespace miku {
         }
 
         EVENT_CLASS_TYPE(KeyReleased)
+    };
+
+    class YIC_API KeyTypeEvent : public KeyEvent{
+    public:
+        KeyTypeEvent(int keycode) : KeyEvent(keycode){
+
+        }
+
+        std::string toString() const override{
+            std::stringstream ss;
+            ss << "KeyTypeEvent " << keyCode_;
+            return ss.str();
+        }
+
+        EVENT_CLASS_TYPE(KeyTyped)
     };
 
 }

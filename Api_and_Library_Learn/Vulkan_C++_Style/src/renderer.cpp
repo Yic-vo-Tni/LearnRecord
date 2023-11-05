@@ -10,7 +10,7 @@ const int MAX_FRAMES_IN_FLIGHT = 2;
 
 namespace yic{
 
-    Renderer::Renderer(Device& device, SwapChain& swapChain, Pipeline& pipeline) :device_{device}, swapChain_{swapChain}, pipeline_{pipeline}{
+    Renderer::Renderer(Device& device) :device_{device}{
         createFrameBuffers();
         createCommandPool();
         createCommandBuffers();
@@ -42,17 +42,17 @@ namespace yic{
     }
 
     void Renderer::createFrameBuffers() {
-        swapChainFrameBuffers.resize(swapChain_.swapChainImageViews_().size());
+        swapChainFrameBuffers.resize(pipeline_->yic_swapchain()->swapChainImageViews_().size());
 
-        for(int i = 0; i < swapChain_.swapChainImageViews_().size(); i++){
-            vk::ImageView attachments[] = {swapChain_.swapChainImageViews_()[i]};
+        for(int i = 0; i < pipeline_->yic_swapchain()->swapChainImageViews_().size(); i++){
+            vk::ImageView attachments[] = {pipeline_->yic_swapchain()->swapChainImageViews_()[i]};
 
             vk::FramebufferCreateInfo framebufferCreateInfo{};
-            framebufferCreateInfo.setRenderPass(pipeline_.renderPass_())
+            framebufferCreateInfo.setRenderPass(pipeline_->renderPass_())
                     .setAttachmentCount(1)
                     .setPAttachments(attachments)
-                    .setWidth(swapChain_.swapChainExtent_().width)
-                    .setHeight(swapChain_.swapChainExtent_().height)
+                    .setWidth(pipeline_->yic_swapchain()->swapChainExtent_().width)
+                    .setHeight(pipeline_->yic_swapchain()->swapChainExtent_().height)
                     .setLayers(1);
 
             swapChainFrameBuffers[i] = device_.device_().createFramebuffer(framebufferCreateInfo);
@@ -97,11 +97,10 @@ namespace yic{
         device_.device_().waitForFences(1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
         uint32_t imageIndex;
-        vk::ResultValue<uint32_t> rvImageIndex = device_.device_().acquireNextImageKHR(swapChain_.swapChain_(), UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE);
+        vk::ResultValue<uint32_t> rvImageIndex = device_.device_().acquireNextImageKHR(pipeline_->yic_swapchain()->swapChain_(), UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE);
         switch (rvImageIndex.result) {
             case vk::Result::eErrorOutOfDateKHR:
-
-                return;
+                break;
             case vk::Result::eSuccess:
             case vk::Result::eSuboptimalKHR:
                 imageIndex = rvImageIndex.value;
@@ -119,7 +118,7 @@ namespace yic{
         vk::Semaphore waitSemaphores[] = {imageAvailableSemaphores[currentFrame]};
         vk::Semaphore signalSemaphores[] = {renderFinishedSemaphores[currentFrame]};
         vk::PipelineStageFlags waitStages[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
-        vk::SwapchainKHR swapChains[] = {swapChain_.swapChain_()};
+        vk::SwapchainKHR swapChains[] = {pipeline_->yic_swapchain()->swapChain_()};
 
         vk::SubmitInfo submitInfo{};
         submitInfo.setWaitSemaphoreCount(1)
@@ -177,9 +176,9 @@ namespace yic{
         commandBuffer.begin(beginInfo);
         {
             vk::RenderPassBeginInfo renderPassBeginInfo{};
-            renderPassBeginInfo.setRenderPass(pipeline_.renderPass_())
+            renderPassBeginInfo.setRenderPass(pipeline_->renderPass_())
                     .setFramebuffer(swapChainFrameBuffers[imageIndex])
-                    .setRenderArea(vk::Rect2D(vk::Offset2D(0, 0), swapChain_.swapChainExtent_()));
+                    .setRenderArea(vk::Rect2D(vk::Offset2D(0, 0), pipeline_->yic_swapchain()->swapChainExtent_()));
 
             vk::ClearValue clearValue = vk::ClearColorValue(1.f, 0.71f, 0.75f, 1.f);
             renderPassBeginInfo.setClearValueCount(1)
@@ -187,13 +186,13 @@ namespace yic{
 
             commandBuffer.beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
             {
-                commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline_.graphicsPipeline_());
+                commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline_->graphicsPipeline_());
 
                 vk::Viewport viewport{};
                 viewport.setX(0.f)
                         .setY(0.f)
-                        .setWidth(static_cast<float>(swapChain_.swapChainExtent_().width))
-                        .setHeight(static_cast<float>(swapChain_.swapChainExtent_().height))
+                        .setWidth(static_cast<float>(pipeline_->yic_swapchain()->swapChainExtent_().width))
+                        .setHeight(static_cast<float>(pipeline_->yic_swapchain()->swapChainExtent_().height))
                         .setMinDepth(0.f)
                         .setMaxDepth(1.f);
 
@@ -201,12 +200,12 @@ namespace yic{
 
                 vk::Rect2D scissor{};
                 scissor.setOffset(vk::Offset2D(0, 0))
-                        .setExtent(swapChain_.swapChainExtent_());
+                        .setExtent(pipeline_->yic_swapchain()->swapChainExtent_());
 
                 commandBuffer.setScissor(0, 1, &scissor);
 
                 vk::DeviceSize offset = 0;
-                commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline_.pipelineLayout_(), 0, desSet[currentFrame], {});
+                commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline_->pipelineLayout_(), 0, desSet[currentFrame], {});
                 commandBuffer.bindVertexBuffers(0, deviceVertexBuffer->buffer_(), offset);
 
                 commandBuffer.draw(3, 1, 0, 0);
@@ -329,7 +328,7 @@ namespace yic{
 
 
     void Renderer::allocateSets() {
-        std::vector<vk::DescriptorSetLayout> setLayouts{MAX_FRAMES_IN_FLIGHT, pipeline_.desSetLayout_()};
+        std::vector<vk::DescriptorSetLayout> setLayouts{MAX_FRAMES_IN_FLIGHT, pipeline_->desSetLayout_()};
         vk::DescriptorSetAllocateInfo desSetAllocInfo{};
         desSetAllocInfo.setDescriptorPool(descriptorPool)
                        .setDescriptorSetCount(MAX_FRAMES_IN_FLIGHT)

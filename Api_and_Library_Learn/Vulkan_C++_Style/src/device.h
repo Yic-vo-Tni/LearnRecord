@@ -30,6 +30,7 @@ namespace yic{
         auto& physicalDevice_() { return physicalDevice; }
         auto& graphicsQueue_() { return graphicsQueue; }
         auto& presentQueue_() { return presentQueue; }
+        auto& window() const { return window_;}
 
         QueueFamilyIndices findQueueFamilies(const vk::PhysicalDevice& device);
     private:

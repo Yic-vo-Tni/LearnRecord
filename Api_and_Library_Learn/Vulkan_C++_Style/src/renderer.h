@@ -18,15 +18,15 @@ namespace yic {
 
     class Renderer {
     public:
-        Renderer(Device& device, SwapChain& swapChain, Pipeline& pipeline);
+        Renderer(Device& device);
         ~Renderer();
 
         void drawFrame();
 
     private:
         Device& device_;
-        SwapChain& swapChain_;
-        Pipeline& pipeline_;
+//        Pipeline& pipeline_;
+        std::unique_ptr<Pipeline> pipeline_ = std::make_unique<Pipeline>(device_);
 
         void createFrameBuffers();
         void createCommandPool();

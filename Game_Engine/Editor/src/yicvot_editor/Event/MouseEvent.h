@@ -7,8 +7,6 @@
 
 #include "Event.h"
 
-#include "sstream"
-
 namespace miku{
     class YIC_API MouseMovedEvent : public Event{
     public:
